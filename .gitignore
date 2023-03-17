@@ -159,4 +159,4 @@ sketch
 /coverage
 
 # production
-/build
+*/build
