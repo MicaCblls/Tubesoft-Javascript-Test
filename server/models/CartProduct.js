@@ -7,6 +7,12 @@ module.exports = (sequelize) => {
     "cartProduct",
     {
       amount: { type: DataTypes.INTEGER },
+      color: {
+        type: DataTypes.STRING,
+      },
+      size: {
+        type: DataTypes.STRING,
+      },
     },
     {
       timestamps: false,

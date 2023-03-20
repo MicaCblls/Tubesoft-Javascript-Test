@@ -21,11 +21,31 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      category: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      gender: {
+        type: DataTypes.ENUM("Male", "Female", "Unisex"),
+        allowNull: false,
+      },
+      size: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: false,
+      },
+      color: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+      },
+      brand: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       description: {
-        type: DataTypes.STRING(5000),
+        type: DataTypes.TEXT,
       },
       image: {
-        type: DataTypes.STRING(5000),
+        type: DataTypes.TEXT,
         allowNull: false,
       },
     },
