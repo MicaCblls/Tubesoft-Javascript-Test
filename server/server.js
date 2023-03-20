@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
 const { conn } = require("./db");
+const saveProductsInDB = require("./helpers/saveProductsInDB");
 
 const app = express();
 app.use(cors());
@@ -28,7 +29,8 @@ app.get("/*", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-conn.sync({ force: true }).then(() => {
+conn.sync({ force: true }).then(async () => {
+  await saveProductsInDB();
   app.listen(PORT, () => {
     console.log(`Server is running on port ${process.env.PORT || 3000}`);
   });

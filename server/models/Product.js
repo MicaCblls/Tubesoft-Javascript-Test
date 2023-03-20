@@ -30,11 +30,11 @@ module.exports = (sequelize) => {
         allowNull: false,
       },
       size: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       color: {
-        type: DataTypes.JSONB,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       brand: {
