@@ -6,12 +6,21 @@ module.exports = (sequelize) => {
   sequelize.define(
     "cartProduct",
     {
-      amount: { type: DataTypes.INTEGER },
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
+        unique: true,
+        allowNull: false,
+      },
+      amount: { type: DataTypes.INTEGER, allowNull: false },
       color: {
         type: DataTypes.STRING,
+        allowNull: false,
       },
       size: {
         type: DataTypes.STRING,
+        allowNull: false,
       },
     },
     {
