@@ -1,6 +1,42 @@
 const { response, request } = require("express");
 const { Cart, CartProduct, Product, Op } = require("../db");
+const getCarts = async (req = request, res = response) => {
+  try {
+    //busco el carrito por id, incluyo los datos de los modelos que necesito
+    const cart = await Cart.findAll({
+      include: [
+        {
+          model: CartProduct,
+          include: [
+            {
+              model: Product,
+              attributes: [
+                "id",
+                "name",
+                "price",
+                "category",
+                "gender",
+                "brand",
+                "description",
+                "image",
+              ],
+            },
+          ],
+        },
+      ],
+      attributes: ["id", "total", "storedCartId"],
+    });
 
+    //si no lo encuentro, respondo 404
+    if (!cart) {
+      return res.status(404).send("Cart not found.");
+    }
+    //si lo encuentro respondo con el carrito
+    return res.status(200).send(cart);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 const getCartById = async (req = request, res = response) => {
   try {
     let { id } = req.params;
@@ -18,15 +54,6 @@ const getCartById = async (req = request, res = response) => {
           include: [
             {
               model: Product,
-              attributes: [
-                "name",
-                "price",
-                "category",
-                "gender",
-                "brand",
-                "description",
-                "image",
-              ],
             },
           ],
         },
@@ -55,6 +82,8 @@ const addProductToCart = async (req = request, res = response) => {
     if (!size || !color || !productId) {
       return res.status(400).send("Incorrect data");
     }
+    //busco el producto cuyo id es igual al productId enviado por body
+    const product = await Product.findByPk(productId);
 
     //si no se envia el id del carrito por query, creo uno nuevo
     if (!id) {
@@ -68,10 +97,10 @@ const addProductToCart = async (req = request, res = response) => {
       cart = await Cart.findOne({
         where: { id: id },
       });
+      if (!cart) {
+        return res.status(400).send("Cart not found");
+      }
     }
-    //busco el producto cuyo id es igual al productId enviado por body
-    const product = await Product.findByPk(productId);
-
     //busco si ya se creo un cartProduct relacionado al producto encontrado y a los valores que recibo
     const foundCartProduct = await CartProduct.findOne({
       include: [{ model: Product }, { model: Cart }],
@@ -87,31 +116,16 @@ const addProductToCart = async (req = request, res = response) => {
 
     //si no se ha creado ese cartProduct lo creo
     if (!foundCartProduct) {
-      const [cartProduct, createdCartProduct] = await CartProduct.findOrCreate({
-        include: [{ model: Product }, { model: Cart }],
-        where: {
-          [Op.and]: [
-            { productId: productId },
-            { cartId: cart.id },
-            { color: color },
-            { size: size },
-          ],
-        },
-        defaults: {
-          amount: amount ? amount : 1,
-          color: color,
-          size: size,
-          cartId: cart.id,
-          productId: productId,
-        },
+      const cartProduct = await CartProduct.create({
+        amount: amount ? amount : 1,
+        color: color,
+        size: size,
+        cartId: cart.id,
+        productId: productId,
       });
-      //si existe product, si existe cart, si existe un cartProduct y el mismo fue creado
-      //relaciono el carrito con el cartProduct y el product con el cartProduct
-      if (product && cart && cartProduct && createdCartProduct) {
-        console.log(cartProduct);
-        await cart.addCartProduct(cartProduct);
-        await product.setCartProduct(cartProduct);
-      }
+
+      await cart.addCartProduct(cartProduct);
+      await cartProduct.addProduct(product);
     }
 
     //si se encontro un cartProduct en la base de datos, su amount es 1 y el amount que llega por body es -1 lo elimino y actualizo el total del carrito
@@ -191,7 +205,6 @@ const deleteCart = async (req = request, res = response) => {
     await cartToDelete.cartProducts?.forEach((cartProduct) =>
       cartProduct.destroy()
     );
-    console.log(cartToDelete);
 
     //elimino el carrito
     await cartToDelete.destroy();
@@ -202,4 +215,4 @@ const deleteCart = async (req = request, res = response) => {
   }
 };
 
-module.exports = { getCartById, addProductToCart, deleteCart };
+module.exports = { getCartById, addProductToCart, deleteCart, getCarts };

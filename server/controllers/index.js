@@ -3,6 +3,7 @@ const {
   getCartById,
   addProductToCart,
   deleteCart,
+  getCarts,
 } = require("./cart.controller");
 
 module.exports = {
@@ -10,4 +11,5 @@ module.exports = {
   getCartById,
   addProductToCart,
   deleteCart,
+  getCarts,
 };

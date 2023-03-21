@@ -61,8 +61,8 @@ sequelize.models = Object.fromEntries(capsEntries);
 const { Product, CartProduct, Cart, StoredCart } = sequelize.models;
 
 // Aca vendrian las relaciones
-Product.hasOne(CartProduct);
-CartProduct.belongsTo(Product);
+Product.belongsToMany(CartProduct, { through: "Cart_Product" });
+CartProduct.belongsToMany(Product, { through: "Cart_Product" });
 
 Cart.hasMany(CartProduct);
 CartProduct.belongsTo(Cart);
