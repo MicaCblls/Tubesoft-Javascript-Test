@@ -1,35 +1,14 @@
 const { response, request } = require("express");
-const { Cart, CartProduct, Product, Op } = require("../db");
+const { Cart, Product, CartProduct, Op } = require("../db");
+
 const getCarts = async (req = request, res = response) => {
   try {
     //busco el carrito por id, incluyo los datos de los modelos que necesito
-    const cart = await Cart.findAll({
-      include: [
-        {
-          model: CartProduct,
-          include: [
-            {
-              model: Product,
-              attributes: [
-                "id",
-                "name",
-                "price",
-                "category",
-                "gender",
-                "brand",
-                "description",
-                "image",
-              ],
-            },
-          ],
-        },
-      ],
-      attributes: ["id", "total", "storedCartId"],
-    });
+    const cart = await Cart.findAll();
 
-    //si no lo encuentro, respondo 404
+    //si no encuentro carritos, respondo 404
     if (!cart) {
-      return res.status(404).send("Cart not found.");
+      return res.status(404).send("Carts not found.");
     }
     //si lo encuentro respondo con el carrito
     return res.status(200).send(cart);
@@ -48,17 +27,6 @@ const getCartById = async (req = request, res = response) => {
     //busco el carrito por id, incluyo los datos de los modelos que necesito
     const cart = await Cart.findOne({
       where: { id: id },
-      include: [
-        {
-          model: CartProduct,
-          include: [
-            {
-              model: Product,
-            },
-          ],
-        },
-      ],
-      attributes: ["id", "total", "storedCartId"],
     });
 
     //si no lo encuentro, respondo 404
@@ -73,117 +41,175 @@ const getCartById = async (req = request, res = response) => {
 };
 const addProductToCart = async (req = request, res = response) => {
   try {
-    let { id } = req.query;
-    let { size, color, amount, productId } = req.body;
+    const { id } = req.query;
+    const { amount, size, color, productId } = req.body;
     let cart;
-    let createdCartId;
 
-    //si no recibe estos valores respondo 400
-    if (!size || !color || !productId) {
+    // Compruebo que se han enviado los datos necesarios
+    if (!amount || !size || !color || !productId) {
       return res.status(400).send("Incorrect data");
     }
-    //busco el producto cuyo id es igual al productId enviado por body
+
+    // Busco el producto con el id enviado
     const product = await Product.findByPk(productId);
 
-    //si no se envia el id del carrito por query, creo uno nuevo
-    if (!id) {
-      cart = await Cart.create({
-        total: amount ? product.price * amount : product.price,
-      });
-      //se establece createdCartId con el id del nuevo carrito
-      createdCartId = cart.id;
-    } else {
-      //en cambio si se envia un id solo busco el carrito en la base de datos
+    if (!product) {
+      return res.status(400).send("Product not found");
+    }
+
+    //una vez que encontre el producto que tengo que agregar creo el item
+    let item;
+    // Si se ha enviado un id, busco el carrito en la base de datos
+    if (id) {
       cart = await Cart.findOne({
-        where: { id: id },
+        where: { id },
       });
-      if (!cart) {
-        return res.status(400).send("Cart not found");
+    }
+
+    // Si se encontro un carrito agrego el producto al carrito y guardo en la base de datos
+    if (cart && cart.items.length) {
+      item = [
+        ...cart.items,
+        {
+          amount,
+          size,
+          color,
+          product: {
+            id: product.dataValues.id,
+            name: product.dataValues.name,
+            brand: product.dataValues.brand,
+            image: product.dataValues.image,
+            price: product.dataValues.price,
+            gender: product.dataValues.gender,
+            category: product.dataValues.category,
+            description: product.dataValues.description,
+          },
+        },
+      ];
+
+      await cart.update({ items: item });
+      await cart.save();
+      await cart.addProduct(product);
+      return res.status(201).send(cart);
+    }
+
+    // Si no encontre un carrito con el id enviado, crear uno nuevo
+    if (!cart) {
+      item = [
+        {
+          amount,
+          size,
+          color,
+          product: {
+            id: product.dataValues.id,
+            name: product.dataValues.name,
+            brand: product.dataValues.brand,
+            image: product.dataValues.image,
+            price: product.dataValues.price,
+            gender: product.dataValues.gender,
+            category: product.dataValues.category,
+            description: product.dataValues.description,
+          },
+        },
+      ];
+      cart = await Cart.create({ items: item });
+      await cart.addProduct(product);
+    }
+
+    return res.status(201).json(cart);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+/* posibilidad de agregar mas de un mismo producto o eliminarlo */
+const updateProductAmount = async (req = request, res = response) => {
+  try {
+    const { id } = req.params;
+    const { amount, productId } = req.body;
+    let cart;
+    let itemToUpdate;
+    let itemUpdated;
+    let newItems;
+
+    // Compruebo que se han enviado los datos necesarios
+    if (!amount || !productId || !id) {
+      return res.status(400).send("Incorrect data");
+    }
+
+    // Busco el producto con el id enviado
+    const product = await Product.findByPk(productId);
+
+    //si no encuentro un producto respondo
+    if (!product) {
+      return res.status(400).send("Product not found");
+    }
+    //si encuentro, busco el carrito
+    cart = await Cart.findOne({ where: { id } });
+
+    //si no encuentro el carrito respondo 404
+    if (!cart) {
+      return res.status(404).send("Cart not found");
+    }
+    //si encuentro un carrito, busco el item que debo actualizar
+    itemToUpdate = cart.items?.find((item) => item.product.id === productId);
+
+    //si el carrito no tiene ese producto agregado, respondo 404
+    if (!itemToUpdate) {
+      return res.status(404).send("Product not found in this cart");
+    }
+
+    //si lo tiene y el amount que llega es -1, resto
+    if (amount === -1) {
+      //si el amount del producto ya era 1 y el amount que llega es -1, elimino el producto del array de items y de la tabla de cartProduct
+      if (itemToUpdate && itemToUpdate.amount === 1 && amount === -1) {
+        newItems = [
+          ...cart.items?.filter((item) => item.product.id !== productId),
+        ];
+        const cartProducts = await CartProduct.findAll({
+          where: { cartId: id },
+        });
+        let cartProductToDelete;
+        if (cartProducts.length === 1) {
+          await cartProducts[0].destroy();
+        }
+
+        cartProductToDelete = cartProducts.find(
+          (item) => item.productId === productId && item.cartId === id
+        );
+
+        await cartProductToDelete.destroy();
+      } else {
+        //si el amount del item era mayor a 1, solo sumo el amount, que al ser -1 va a restarse
+        itemToUpdate = {
+          ...itemToUpdate,
+          amount: itemToUpdate.amount + amount,
+        };
+
+        //guardo los nuevos items
+        newItems = [
+          ...cart.items?.filter((item) => item.product.id !== productId),
+          itemToUpdate,
+        ];
       }
     }
-    //busco si ya se creo un cartProduct relacionado al producto encontrado y a los valores que recibo
-    const foundCartProduct = await CartProduct.findOne({
-      include: [{ model: Product }, { model: Cart }],
-      where: {
-        [Op.and]: [
-          { productId: productId },
-          { cartId: cart.id },
-          { color: color },
-          { size: size },
-        ],
-      },
-    });
 
-    //si no se ha creado ese cartProduct lo creo
-    if (!foundCartProduct) {
-      const cartProduct = await CartProduct.create({
-        amount: amount ? amount : 1,
-        color: color,
-        size: size,
-        cartId: cart.id,
-        productId: productId,
-      });
+    //si el amount que me llega es 1, lo sumo
+    if (amount >= 1) {
+      itemUpdated = { ...itemToUpdate, amount: itemToUpdate.amount + amount };
 
-      await cart.addCartProduct(cartProduct);
-      await cartProduct.addProduct(product);
+      newItems = [
+        ...cart.items?.filter((item) => item.product.id !== productId),
+        itemUpdated,
+      ];
     }
 
-    //si se encontro un cartProduct en la base de datos, su amount es 1 y el amount que llega por body es -1 lo elimino y actualizo el total del carrito
-    if (foundCartProduct?.amount === 1 && amount === -1) {
-      await cart.update({
-        total:
-          cart.total - product.price === 0 ? 0 : cart.total - product.price,
-      });
-      await foundCartProduct.destroy();
-
-      return res.status(202).send("The product was deleted");
-    }
-
-    //si no se tuvo que crear un carrito ni un cartProduct actualizo el total del carrito
-    if (!createdCartId && foundCartProduct) {
-      const gettingTotal = () => {
-        if (amount > 1) {
-          return cart.total + product.price * amount;
-        }
-        if (amount === 1) {
-          return cart.total + product.price;
-        }
-        if (amount === -1) {
-          return cart.total - product.price;
-        }
-      };
-
-      await cart.update({
-        total: gettingTotal(),
-      });
-      //y actualizo el amount del producto encontrado
-      await foundCartProduct.update({
-        amount: amount
-          ? foundCartProduct.amount + amount
-          : foundCartProduct.amount + 1,
-      });
-      await cart.save();
-      await foundCartProduct.save();
-      return res
-        .status(202)
-        .send(amount === -1 ? "One product less" : "One more product added");
-    }
-
-    //si no se tuvo que crear un carrito, pero se creo un cartProduct actualizo el total del carrito solamente
-    if (!createdCartId && !foundCartProduct) {
-      await cart.update({
-        total: amount
-          ? cart.total + product.price * amount
-          : cart.total + product.price,
-      });
-      await cart.save();
-      return res.status(201).send("New product added");
-    }
-
-    //respondo con los datos del carrito con el que estoy interactuando para obtener el id
-    return res.status(201).send(cart);
+    //actualizo el carrito guardando los newItems
+    await cart.update({ items: newItems });
+    await cart.save();
+    res.status(200).send(cart);
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
 };
 
@@ -197,14 +223,12 @@ const deleteCart = async (req = request, res = response) => {
     }
 
     //hay ID busco el carrito que hay que borrar
-    const cartToDelete = await Cart.findByPk(id, {
-      include: [{ model: CartProduct }],
-    });
+    const cartToDelete = await Cart.findByPk(id);
+    //busco todos los productos relacionado en la tabla de cartProduct
+    let cartProducts = await CartProduct.findAll({ where: { cartId: id } });
 
-    //elimino los cartProduct que pueda tener adentro
-    await cartToDelete.cartProducts?.forEach((cartProduct) =>
-      cartProduct.destroy()
-    );
+    //los elimino de la tabla
+    await cartProducts.forEach((item) => item.destroy());
 
     //elimino el carrito
     await cartToDelete.destroy();
@@ -215,4 +239,10 @@ const deleteCart = async (req = request, res = response) => {
   }
 };
 
-module.exports = { getCartById, addProductToCart, deleteCart, getCarts };
+module.exports = {
+  getCartById,
+  addProductToCart,
+  updateProductAmount,
+  deleteCart,
+  getCarts,
+};
