@@ -13,9 +13,10 @@ module.exports = (sequelize) => {
         unique: true,
         allowNull: false,
       },
-      total: {
-        type: DataTypes.INTEGER,
+      items: {
+        type: DataTypes.ARRAY(DataTypes.JSONB),
         allowNull: false,
+        defaultValue: [],
       },
     },
     {

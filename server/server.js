@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const logger = require("morgan");
-const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
 const { conn } = require("./db");
@@ -10,16 +9,18 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cart.routes");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
+//Middleware
 app.use(cors());
 // Log requests to the console.
-app.use(logger("dev"));
-// Parse incoming requests data (https://github.com/expressjs/body-parser)
-app.use(bodyParser.json());
+// app.use(logger("dev"));
 //used to parse incoming requests with urlencoded payloads.
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 //used to parse incoming JSON payloads. The limit option specifies the maximum size of the payload to be accepted by the server.
-app.use(bodyParser.json({ limit: "50mb" }));
+app.use(express.json({ limit: "50mb" }));
+//serves static files from the ../client/build directory using the express.static()middleware
+app.use(express.static(path.join(__dirname, "../client/build")));
 
 //adds headers to the server's responses, allowing cross-origin resource sharing (CORS) requests from any domain
 app.use((req, res, next) => {
@@ -33,21 +34,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configurar el servidor para exponer archivos estáticos de React
-app.use(express.static(path.join(__dirname, "../client/build")));
+//Routes
+app.use(productRoutes);
+app.use(cartRoutes);
 
-// Configurar el servidor para manejar todas las solicitudes que no sean para archivos estáticos de React
-app.get("/", (req, res) => {
+// Configure the server to handle all requests other than for static React files
+app.get("*", (req, res) => {
   if (fs.existsSync(path.join(__dirname, "../client/build", "index.html"))) {
     res.sendFile(path.join(__dirname, "../client/build", "index.html"));
   } else {
     res.sendFile(path.join(__dirname, "public", "build.html"));
   }
 });
-
-//use router
-app.use(productRoutes);
-app.use(cartRoutes);
 
 // Error catching endware.
 app.use((err, req, res, next) => {
@@ -59,8 +57,6 @@ app.use((err, req, res, next) => {
 });
 
 //server listen
-const PORT = process.env.PORT || 3000;
-
 conn.sync({ force: true }).then(async () => {
   await saveProductsInDB();
   app.listen(PORT, () => {
