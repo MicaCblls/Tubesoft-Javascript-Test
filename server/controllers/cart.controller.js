@@ -227,8 +227,11 @@ const deleteCart = async (req = request, res = response) => {
     //busco todos los productos relacionado en la tabla de cartProduct
     let cartProducts = await CartProduct.findAll({ where: { cartId: id } });
 
-    //los elimino de la tabla
-    await cartProducts.forEach((item) => item.destroy());
+    //uso un condicional para en caso de que el carrito no tenga productos relacionados no se ejecute el destroy
+    if (cartProducts.length) {
+      //los elimino de la tabla
+      await cartProducts.forEach((item) => item.destroy());
+    }
 
     //elimino el carrito
     await cartToDelete.destroy();
