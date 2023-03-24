@@ -13,12 +13,12 @@
     "image": "https://http2.mlstatic.com/D_NQ_NP_750910-MLU51264755911_082022-O.webp"
   },
   {
-    "name": "Jacket Reebok Accelerate Negro",
+    "name": "Jacket Reebok Accelerate",
     "category": "Jacket",
     "gender": "Male",
     "size": ["XS", "S", "XL", "2XL"],
     "color": {
-      "color1": "black"
+      "color1": "grey"
     },
     "brand": "Reebok",
     "description": "Made with soft fleece fabric for warmth and comfort. Fleece fabric for extra softness and warmth on the inside. Full zipper and hood for adjustable protection. Front pockets for storage of small items.",
@@ -71,7 +71,7 @@
     "gender": "Female",
     "size": ["S", "M", "L", "XL", "2XL"],
     "color": {
-      "color1": "black"
+      "color1": "pink"
     },
     "brand": "Puma",
     "description": "Cotton sport jacket with pockets and hood, Launch season: Spring/Summer",
@@ -341,10 +341,8 @@
     "color": {
       "color1": "black",
       "color2": "grey",
-      "color3": "yellow",
-      "color4": "green",
-      "color5": "white",
-      "color6": "blue"
+      "color3": "white",
+      "color4": "blue"
     },
     "brand": "Nike",
     "description": "versatile and stylish ruched pants with a high-waist",
@@ -360,8 +358,7 @@
       "color1": "black",
       "color2": "grey",
       "color3": "pink",
-      "color4": "green",
-      "color5": "white"
+      "color4": "green"
     },
     "brand": "Nike",
     "description": "High-Rise Ruched Pants are engineered with a flat front waistband for a clean aesthetic. Adaptable tie cord funnels on the legs can be ruched up for a sophisticated silhouette.",
@@ -377,8 +374,7 @@
       "color1": "black",
       "color2": "grey",
       "color3": "pink",
-      "color4": "green",
-      "color5": "white"
+      "color4": "green"
     },
     "brand": "Nike",
     "description": "comfortable, versatile ciclying short nike one mid-waist waterproof fabric",
@@ -394,8 +390,7 @@
       "color1": "black",
       "color2": "grey",
       "color3": "pink",
-      "color4": "green",
-      "color5": "white"
+      "color4": "green"
     },
     "brand": "Adidas",
     "description": "These overpants are designed for cross-country skiing at a low intensity. The 150 overpants are very practical thanks to their loose fit. Can be worn over a base layer and full zipper opening at the sides.The side openings let you adapt your outfit to your body temperature.",
@@ -411,8 +406,7 @@
       "color1": "black",
       "color2": "grey",
       "color3": "yellow",
-      "color4": "green",
-      "color5": "white"
+      "color4": "green"
     },
     "brand": "Adidas",
     "description": "comfortable traing shorts made by reclicled plastic bottles",
@@ -428,8 +422,7 @@
       "color1": "black",
       "color2": "grey",
       "color3": "yellow",
-      "color4": "green",
-      "color5": "white"
+      "color4": "white"
     },
     "brand": "Nike",
     "description": "versatile and stylish jogger pants with a high-waist",
@@ -445,8 +438,7 @@
       "color1": "black",
       "color2": "grey",
       "color3": "pink",
-      "color4": "green",
-      "color5": "white"
+      "color4": "white"
     },
     "brand": "Reebok",
     "description": "These waterproof pants were developed for inshore sailing in stormy weather. These waterproof sailing overpants have a handy pocket and adjustable ankle cuffs. Plus, they are ultra-comfortable and lightweight.",
@@ -462,8 +454,7 @@
       "color1": "black",
       "color2": "grey",
       "color3": "pink",
-      "color4": "green",
-      "color5": "white"
+      "color4": "white"
     },
     "brand": "Adidas",
     "description": "Are you looking for pants that you can wear for your daily activities and also on the pitch? The search ends with these adidas pants. Incorporating AEROREADY wicking technology and an elasticated drawstring waist that complements the classic silhouette that never goes out of style. Rather, it has everything.",
@@ -478,9 +469,7 @@
     "color": {
       "color1": "black",
       "color2": "grey",
-      "color3": "yellow",
-      "color4": "green",
-      "color5": "white"
+      "color3": "yellow"
     },
     "brand": "Nike",
     "description": "versatile and stylish jogger pants with a high-waist",
@@ -879,8 +868,7 @@
       "color1": "white",
       "color2": "black",
       "color3": "red",
-      "color4": "green",
-      "color5": "grey"
+      "color4": "green"
     },
     "brand": "Adidas",
     "description": "There are times to go hard, and then there are moments to give into the stillness. Both are a showcase of strength. Whatever the speed, this adidas t-shirt is down for it. Soft material hangs on the body with a loose, casual shape for total comfort. A logo graphic on the front puts your dedication on full display — not like it wasn\"t already clear.",
@@ -941,8 +929,7 @@
       "color1": "white",
       "color2": "black",
       "color3": "orange",
-      "color4": "yellow",
-      "color5": "blue"
+      "color4": "yellow"
     },
     "brand": "Nike",
     "description": "Take on your daily route with the Nike Dri-FIT Miler Top. It features lightweight performance and mobility for the entry-level runner. This product is made with at least 50% recycled polyester fibers",
