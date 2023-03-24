@@ -67,7 +67,30 @@ const addProductToCart = async (req = request, res = response) => {
     }
 
     // Si se encontro un carrito agrego el producto al carrito y guardo en la base de datos
-    if (cart && cart.items.length) {
+    if (cart && !cart.items.length) {
+      item = [
+        {
+          amount,
+          size,
+          color,
+          product: {
+            id: product.dataValues.id,
+            name: product.dataValues.name,
+            brand: product.dataValues.brand,
+            image: product.dataValues.image,
+            price: product.dataValues.price,
+            gender: product.dataValues.gender,
+            category: product.dataValues.category,
+            description: product.dataValues.description,
+          },
+        },
+      ];
+
+      await cart.update({ items: item });
+      await cart.save();
+      await cart.addProduct(product);
+      return res.status(201).send(cart);
+    } else if (cart && cart.items.length) {
       item = [
         ...cart.items,
         {
@@ -116,7 +139,7 @@ const addProductToCart = async (req = request, res = response) => {
       await cart.addProduct(product);
     }
 
-    return res.status(201).json(cart);
+    return res.status(201).send(cart);
   } catch (error) {
     console.log(error);
   }
@@ -166,17 +189,10 @@ const updateProductAmount = async (req = request, res = response) => {
         newItems = [
           ...cart.items?.filter((item) => item.product.id !== productId),
         ];
-        const cartProducts = await CartProduct.findAll({
-          where: { cartId: id },
-        });
-        let cartProductToDelete;
-        if (cartProducts.length === 1) {
-          await cartProducts[0].destroy();
-        }
 
-        cartProductToDelete = cartProducts.find(
-          (item) => item.productId === productId && item.cartId === id
-        );
+        let cartProductToDelete = await CartProduct.findOne({
+          where: { [Op.and]: { cartId: id, productId: productId } },
+        });
 
         await cartProductToDelete.destroy();
       } else {
