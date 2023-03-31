@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 //Middleware
 app.use(cors());
 // Log requests to the console.
-// app.use(logger("dev"));
+app.use(logger("dev"));
 //used to parse incoming requests with urlencoded payloads.
 app.use(express.urlencoded({ extended: true }));
 //used to parse incoming JSON payloads. The limit option specifies the maximum size of the payload to be accepted by the server.

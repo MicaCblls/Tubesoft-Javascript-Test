@@ -160,3 +160,8 @@ sketch
 
 # production
 */build
+
+# Ignore package lock files
+**/package-lock.json
+
+
