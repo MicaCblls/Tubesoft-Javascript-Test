@@ -1,13 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Button, Grid, Paper, Typography, useTheme } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import RemoveIcon from "@material-ui/icons/Remove";
 import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
-import {
-  RadioButtonsColorGroup,
-  RadioButtonsSizeGroup,
-} from "./Size&ColorButtons";
 
 const useStyles = makeStyles({
   paper: {
@@ -26,11 +22,11 @@ const useStyles = makeStyles({
     },
   },
   grid: {
-    display: "flex",
+    display: "flex!important",
     justifyContent: "center",
     alignContent: "center",
     maxHeight: "max-content",
-    height: "auto",
+    height: "auto!important",
     "@media (min-width: 780px)": {
       height: "350px",
     },
@@ -52,11 +48,11 @@ const useStyles = makeStyles({
   },
 
   buttonAdd: {
-    padding: "6px 6px",
-    minWidth: "44px",
-    lineHeight: "1.75",
-    borderRadius: "4px",
-    letterSpacing: "0.02em",
+    padding: "6px 6px!important",
+    minWidth: "44px!important",
+    lineHeight: "1.75!important",
+    borderRadius: "4px!important",
+    letterSpacing: "0.02em!important",
     textTransform: "uppercase",
     "@media (min-width: 780px)": {
       minWidth: "54px",
@@ -77,10 +73,6 @@ const useStyles = makeStyles({
   text: {
     fontSize: "20px",
   },
-  radioButtons: {
-    display: "flex",
-    flexDirection: "column",
-  },
 });
 
 export default function ProductCard({ product }) {
@@ -99,14 +91,13 @@ export default function ProductCard({ product }) {
 
   const classes = useStyles();
   const theme = useTheme();
+  let [amount, setAmount] = useState(0);
   return (
     <>
       <Paper className={classes.paper}>
         <Grid container spacing={2} className={classes.grid}>
-          <Grid item>
-            <Grid item className={classes.image}>
-              <img className={classes.img} alt={name} src={image} />
-            </Grid>
+          <Grid item className={classes.image}>
+            <img className={classes.img} alt={name} src={image} />
           </Grid>
           <Grid item xs={12} sm container>
             <Grid
@@ -123,22 +114,20 @@ export default function ProductCard({ product }) {
                 <Typography color="textSecondary">{category}</Typography>
                 <Typography color="textSecondary">{gender}</Typography>
               </Grid>
-              <Grid item xs className={classes.radioButtons}>
-                {size && size?.split(", ").length ? (
-                  <RadioButtonsSizeGroup size={size} />
-                ) : null}
-                {color && color?.split(", ").length ? (
-                  <RadioButtonsColorGroup color={color} />
-                ) : null}
-              </Grid>
               <Grid item className={classes.buttonsGrid}>
-                <Button variant="contained">
+                <Button
+                  variant="contained"
+                  onClick={() => setAmount(amount + 1)}
+                >
                   <AddIcon />
                 </Button>
                 <Typography variant="subtitle1" className={classes.amount}>
-                  1
+                  {amount ? amount : 0}
                 </Typography>
-                <Button variant="contained">
+                <Button
+                  variant="contained"
+                  onClick={() => setAmount(amount ? amount - 1 : 0)}
+                >
                   <RemoveIcon />
                 </Button>
                 <Button
