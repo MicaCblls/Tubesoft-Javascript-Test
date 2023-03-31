@@ -1,24 +1,12 @@
 import { Route } from "react-router-dom";
 import Home from "./components/Home";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { createTheme, ThemeProvider } from "@material-ui/core";
-import { makeStyles } from "@mui/styles";
 import useFetch from "./useFetch";
+import { createTheme } from "@material-ui/core";
+import { ThemeProvider } from "@mui/styles";
 
 const theme = createTheme({
   overrides: {
-    MuiFormGroup: {
-      root: {
-        display: "inline-flex",
-        flexDirection: "row",
-        flexWrap: "wrap",
-        fontSize: "16px",
-
-        "@media (min-width: 780px)": {
-          maxHeight: "80px",
-        },
-      },
-    },
     MuiButton: {
       root: {
         borderRadius: 6,
